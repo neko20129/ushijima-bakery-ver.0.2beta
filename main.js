@@ -1,8 +1,6 @@
-//EventListener
-window.addEventListener('click', (e) => {
-  e.stopPropagation(); // 拡張機能がイベントを拾うのを防ぐ（場合による）
-}, true); // キャプチャリングフェーズで実行
+console.log('loaded');
 
+//EventListener
 buyOpen.addEventListener('click', () => {
     buyPage = 1;
     reloadOfBuy();
