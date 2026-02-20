@@ -169,7 +169,6 @@ makeAll.addEventListener('click', () => {
 //ゲームループ
 setInterval(() => {
     reloadOfDisplay();
-    save();
     if (Math.floor(Math.random() * 15 * (100 - level * 2)) === 1) {
         if (makeDisplay[1][6] > 0 || makeDisplay[2][6] > 0) comeBuyer();
     }
@@ -540,6 +539,7 @@ function buy(num) {
         }
     }
     reloadOfBuy();
+    save();
 }
 
 function sell(num) {
@@ -548,6 +548,7 @@ function sell(num) {
         buyDisplay[buyPage][3] = buyDisplay[buyPage][3] - num;
     }
     reloadOfBuy();
+    save();
 }
 
 function make(num) {
@@ -583,7 +584,7 @@ function make(num) {
     }
     
     reloadOfMake();
-    
+    save();
     addMessage(makeDisplay[makePage][0] + 'を' + num + '個作った');
 }
 
@@ -606,4 +607,5 @@ function comeBuyer() {
     makeDisplay[willbuytype][6] = makeDisplay[willbuytype][6] - willbuynum;
     money = money + makeDisplay[willbuytype][4] * willbuynum;
     sold = sold + willbuynum;
+    save();
 }
