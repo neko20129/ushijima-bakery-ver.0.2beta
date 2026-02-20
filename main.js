@@ -369,8 +369,8 @@ function reloadOfChangeTub() {
 
     if (makeDisplay[5]) {
         if (makeDisplay[5][7] <= level) {
-            table2_5_name.textContent = buyDisplay[5][0];
-            table2_5_num.textContent = buyDisplay[5][6];
+            table2_5_name.textContent = makeDisplay[5][0];
+            table2_5_num.textContent = makeDisplay[5][6];
             table2_5_elm.style.display = '';
         } else {
             table2_5_elm.style.display = 'none';
