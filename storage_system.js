@@ -6,13 +6,14 @@ function save() {
 }
 
 function load() {
-  if (!localStorage.getItem('moneyKey') || !localStorage.getItem('levelKey') || !localStorage.getItem('soldKey') || !localStorage.getItem('levelUpKey')) {
+  if (localStorage.getItem('moneyKey') || localStorage.getItem('levelKey') || localStorage.getItem('soldKey') || localStorage.getItem('levelUpKey')) {
     money = localStorage.getItem('moneyKey');
     level = localStorage.getItem('levelKey');
     sold = localStorage.getItem('soldKey');
     levelUp = localStorage.getItem('levelUpKey');
   }
 }
+
 
 
 
