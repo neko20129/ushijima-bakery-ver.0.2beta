@@ -1,6 +1,8 @@
-console.log('loaded');
-
 //EventListener
+document.addEventListener('DOMContentLoaded', function() {
+    load();
+});
+
 buyOpen.addEventListener('click', () => {
     buyPage = 1;
     reloadOfBuy();
@@ -167,6 +169,7 @@ makeAll.addEventListener('click', () => {
 //ゲームループ
 setInterval(() => {
     reloadOfDisplay();
+    save();
     if (Math.floor(Math.random() * 15 * (100 - level * 2)) === 1) {
         if (makeDisplay[1][6] > 0 || makeDisplay[2][6] > 0) comeBuyer();
     }
