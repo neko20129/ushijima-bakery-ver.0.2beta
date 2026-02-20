@@ -1,8 +1,8 @@
 //EventListener
-document.addEventListener('DOMContentLoaded', function() {
-    load();
+window.addEventListener('load', function() {
+  console.log('すべてのリソースが読み込まれました');
+  // ここに処理を記述
 });
-
 buyOpen.addEventListener('click', () => {
     buyPage = 1;
     reloadOfBuy();
