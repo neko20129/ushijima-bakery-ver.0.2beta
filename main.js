@@ -168,40 +168,14 @@ makeAll.addEventListener('click', () => {
 
 saveElm.addEventListener('click', () => {
   alert('以下をコピーしてください。出力された値を変更した場合、データが壊れる可能性があります。\n↓\n'+
-        money+'*'+level+'*'+sold+'*'+levelUp+'*'+JSON.stringify(buyDisplay)+'*'+JSON.stringify(makeDisplay)+'^');
+        money+'*'+level+'*'+sold+'*'+levelUp+'*'+JSON.stringify(buyDisplay)+'*'+JSON.stringify(makeDisplay));
 });
 
 loadElm.addEventListener('click', () => {
   let data = prompt('セーブデータを入力してください');
-  let moji = 0; //現在選択している文字が何番目か
-  let item = 1; //選択している項目が何番目か
-  money = '';
-  level = '';
-  sold = '';
-  levelUp = '';
-  buyDisplay = '';
-  makeDisplay = '';
-  
-  while (data[moji] === '^') {
-    while (data[moji] === '*') {
-      switch (item) {
-        case 1:
-          money = `${money}${data[moji]}`;
-        case 2:
-          level = `${level}${data[moji]}`;
-        case 3:
-          sold = `${sold}${data[moji]}`;
-        case 4:
-          levelUp = `${levelUp}${data[moji]}`;
-        case 5:
-          buyDisplay = `${buyDisplay}${data[moji]}`;
-        case 6:
-          makeDisplay = `${makeDisplay}${data[moji]}`;
-      };
-      moji++;
-    };
-    item++;
-  };
+  const [money, level, sold, levelUp, buyDisplay, makeDisplay] = data.split('*');
+  buyDisplay = JSON.parse(buyDisplay);
+  makeDisplay = JSON.parse(makeDisplay);
 });
 //ゲームループ
 setInterval(() => {
