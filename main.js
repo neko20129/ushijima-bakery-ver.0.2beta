@@ -173,9 +173,14 @@ saveElm.addEventListener('click', () => {
 
 loadElm.addEventListener('click', () => {
   let data = prompt('セーブデータを入力してください');
-  const [money, level, sold, levelUp, buyDisplay, makeDisplay] = data.split('*');
-  buyDisplay = JSON.parse(buyDisplay);
-  makeDisplay = JSON.parse(makeDisplay);
+  let items = data.split('*');
+  if (items === 6) {
+    const [money, level, sold, levelUp, buyDisplay, makeDisplay] = items;
+    buyDisplay = JSON.parse(buyDisplay);
+    makeDisplay = JSON.parse(makeDisplay);
+  } else {
+    alert('エラー: セーブデータを解析できません');
+  }
 });
 //ゲームループ
 setInterval(() => {
