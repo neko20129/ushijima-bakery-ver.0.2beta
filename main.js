@@ -166,19 +166,47 @@ makeAll.addEventListener('click', () => {
     //作れるなら作れる分作る
 });
 
+upgradeB1.addEventListener('click', () => {
+    if (level >= upgradeDisplay[1][2] && money >= upgradeDisplay[1][3]) {
+        upgradeDisplay[1][1]++;
+        money = money - upgradeDisplay[1][3];
+        upgradeDisplay[1][3] = Math.floor(upgradeDisplay[1][3] * 1.2);
+    }
+    reloadOfUpgrade();
+});
+
+upgradeB2.addEventListener('click', () => {
+    if (level >= upgradeDisplay[2][2] && money >= upgradeDisplay[2][3]) {
+        upgradeDisplay[2][1]++;
+        money = money - upgradeDisplay[2][3];
+        upgradeDisplay[2][3] = Math.floor(upgradeDisplay[2][3] * 1.2)
+    }
+    reloadOfUpgrade();
+});
+
+upgradeB3.addEventListener('click', () => {
+    if (level >= upgradeDisplay[3][2] && money >= upgradeDisplay[3][3]) {
+        upgradeDisplay[3][1]++;
+        money = money - upgradeDisplay[3][3];
+        upgradeDisplay[3][3] = Math.floor(upgradeDisplay[3][3] * 1.2)
+    }
+    reloadOfUpgrade();
+});
+
 saveElm.addEventListener('click', () => {
-  navigator.clipboard.writeText(money+'*'+level+'*'+sold+'*'+levelUp+'*'+JSON.stringify(buyDisplay)+'*'+JSON.stringify(makeDisplay));
-  alert('クリップボードにコピーしました！　ctrl+vで呼び出せます');
+navigator.clipboard.writeText(money+'*'+level+'*'+sold+'*'+levelUp+'*'+JSON.stringify(buyDisplay)+'*'+JSON.stringify(makeDisplay)+'*'+JSON.stringify(upgradeDisplay));
+  alert('クリップボードにコピーしました！　ctrl+Vで呼び出せます');
 });
 
 loadElm.addEventListener('click', () => {
   let data = prompt('セーブデータを入力してください');
   let items = data.split('*');
   try {
-    if (items.length === 6) {
-      [money, level, sold, levelUp, buyDisplay, makeDisplay] = items;
+    if (items.length === 7) {
+      [money, level, sold, levelUp, buyDisplay, makeDisplay, upgradeDisplay] = items;
       buyDisplay = JSON.parse(buyDisplay);
       makeDisplay = JSON.parse(makeDisplay);
+      upgradeDisplay = JSON.parse(upgradeDisplay);
       alert('ロードに成功しました！');
     } else {
       alert('エラー: セーブコードのうちどれかの項目が足りません。');
@@ -191,19 +219,59 @@ loadElm.addEventListener('click', () => {
     }
   }
 });
+
 //ゲームループ
-setInterval(() => {
-    reloadOfDisplay();
-    if (Math.floor(Math.random() * 15 * (100 - level * 2)) === 1) {
-        if (makeDisplay[1][6] > 0 || makeDisplay[2][6] > 0) comeBuyer();
+const workerCode = `
+  self.onmessage = function(e) {
+    if (e.data === 'start') {
+      setInterval(() => {
+        self.postMessage('tick');
+      }, 10); // 0.01秒間隔
     }
-    if (sold >= levelUp) {
-        level++
-        sold = sold - levelUp;
-        levelUp = Math.floor(levelUp * 1.5);
-        addMessage('レベルアップ！', 1)
+  };
+`;
+
+const blob = new Blob([workerCode], { type: 'text/javascript' });
+const workerUrl = URL.createObjectURL(blob);
+
+const myWorker = new Worker(workerUrl);
+let timer = 0;
+myWorker.onmessage = function(e) {
+  if (e.data === 'tick') {
+        reloadOfDisplay();
+        const having = makeDisplay[1][6] + makeDisplay[2][6] + makeDisplay[3][6] + makeDisplay[4][6] +
+            makeDisplay[5][6] + makeDisplay[6][6] + makeDisplay[7][6];
+        const n = Math.floor(
+            Math.random() * (1200 - //倍率定数
+            having * 1.1 - //所持数倍率
+            upgradeDisplay[1][1] * 2.12 - //アップグレード倍率
+            level * 1.25 //レベル倍率
+            )
+        );
+      
+        if (timer <= 0) {
+            if (n <= 5) {
+                console.log(n);
+                if (makeDisplay[1][6] > 0 || makeDisplay[2][6] > 0 || makeDisplay[3][6] > 0 || makeDisplay[4][6] >
+                    0|| makeDisplay[5][6] > 0 || makeDisplay[6][6] > 0 || makeDisplay[7][6] > 0) {
+                    comeBuyer();
+                    timer = 300 - upgradeDisplay[1][1] * 3;
+                }
+            }
+        } else {
+            timer--;
+        }
+    
+        if (sold >= levelUp) {
+            level++
+            sold = sold - levelUp
+            levelUp = Math.floor(levelUp * 1.75);
+            addMessage('レベルアップ！', 1)
+        } 
     }
-}, 10);
+};
+
+myWorker.postMessage('start');
 
 //関数
 function addMessage(message,color) {
@@ -233,6 +301,7 @@ function reloadOfDisplay() {
     moneyElm2.textContent = money;
 
     reloadOfChangeTub();
+    reloadOfUpgrade();
 }
 
 function reloadOfChangeTub() {
@@ -495,7 +564,7 @@ function reloadOfBuy() {
 function reloadOfMake() {
     makeName.textContent = makeDisplay[makePage][0];
     makeHave.textContent = makeDisplay[makePage][6];
-    income.textContent = makeDisplay[makePage][4];
+    income.textContent = Number(makeDisplay[makePage][4]) + Number(upgradeDisplay[3][1] * 80 - 80);
     makeOpenLv.textContent = makeDisplay[makePage][7];
     makeImg.src = makeDisplay[makePage][5];
 
@@ -553,6 +622,36 @@ function reloadOfMake() {
     }
 };
 
+function reloadOfUpgrade() {
+    upgradeL1.textContent = upgradeDisplay[1][1];
+    upgradeL2.textContent = upgradeDisplay[2][1];
+    upgradeL3.textContent = upgradeDisplay[3][1];
+    upgradeUL1.textContent = upgradeDisplay[1][2];
+    upgradeUL2.textContent = upgradeDisplay[2][2];
+    upgradeUL3.textContent = upgradeDisplay[3][2];
+    upgradeN1.textContent = upgradeDisplay[1][3];
+    upgradeN2.textContent = upgradeDisplay[2][3];
+    upgradeN3.textContent = upgradeDisplay[3][3];
+    
+    if (level < upgradeUL1.textContent) {
+        upgradeB1.style.filter = 'brightness(0.5)';
+    } else {
+        upgradeB1.style.filter = '';
+    }
+
+    if (level < upgradeUL2.textContent) {
+        upgradeB2.style.filter = 'brightness(0.5)';
+    } else {
+        upgradeB2.style.filter = '';
+    }
+
+    if (level < upgradeUL3.textContent) {
+        upgradeB3.style.filter = 'brightness(0.5)';
+    } else {
+        upgradeB3.style.filter = '';
+    }
+}
+
 function buy(num) {
     if (buyDisplay[buyPage][1]*num <= money) {
         money = money - buyDisplay[buyPage][1] * num;
@@ -577,6 +676,8 @@ function sell(num) {
 }
 
 function make(num) {
+    timer = 500 - upgradeDisplay[1][1];
+    
     if (makeDisplay[makePage][1][0] == 0 || 
         buyDisplay[makeDisplay[makePage][1][0]][3] * num >= makeDisplay[makePage][1][1])
     {
@@ -626,11 +727,51 @@ function comeBuyer() {
         }
     }
     let willbuytype = canbuyList[Math.floor(Math.random() * canbuyList.length)];
-    let willbuynum = Math.floor(Math.random() * Math.min(makeDisplay[willbuytype][6], level + 1)) + 1;
+    let willbuynum = Math.floor(Math.random() * Math.min(makeDisplay[willbuytype][6], level + 1 + upgradeDisplay[2][1])) + 1;
     //乱数で選んだ内の1つのパンの個数
     addMessage(makeDisplay[willbuytype][0] + 'が' + willbuynum + '個売れた');
     makeDisplay[willbuytype][6] = makeDisplay[willbuytype][6] - willbuynum;
     money = money + makeDisplay[willbuytype][4] * willbuynum;
-    sold = sold + willbuynum;
+    sold = sold + willbuynum + upgradeDisplay[3][1] * 80;
     save();
 }
+
+function clear() {
+    money = 115;
+    level = 1;
+    sold = 0;
+    levelUp = 4;
+
+    buyDisplay = [
+        [null],
+        [['小麦'],[30],['img/komugi.png'],[0],[1]],
+        [['小豆'],[50],['img/azuki.png'],[0],[1]],
+        [['チョコレート'],[80],['img/choko.png'],[0],[2]],
+        [['卵'],[90],['img/tamago.png'],[0],[2]],
+        [['牛乳'],[105],['img/gyunyu.png'],[0],[2]],
+        [['砂糖'],[110],['img/satou.png'],[0],[3]],
+        [['バター'],[120],['img/bata.png'],[0],[3]],
+        [['塩'],[160],['img/sio.png'],[0],[4]],
+        [['はちみつ'],[200],['img/hatimitu.png'],[0],[4]]
+    ]
+
+    makeDisplay = [
+        [null],
+        [['パン'],[[1],[1]],[[0],[0]],[[0],[0]],[45],['img/pan.png'],[0],[1]],
+        [['あんぱん'],[[1],[2]],[[2],[1]],[[0],[0]],[130],['img/anpan.png'],[0],[1]],
+        [['チョココロネ'],[[1],[1]],[[3],[1]],[[0],[0]],[270],['img/korone.png'],[0],[2]],
+        [['クリームパン'],[[1],[1]],[[4],[1]],[[5],[1]],[440],['img/kurimu.png'],[0],[2]],
+        [['ウシジマパン'],[[1],[3]],[[6],[2]],[[7],[1]],[760],['img/ushijima.png'],[0],[3]],
+        [['塩パン'],[[1],[1]],[[7],[1]],[[8],[1]],[810],['img/siopan.png'],[0],[4]],
+        [['ベーグル'],[[1],[2]],[[6],[2]],[[9],[1]],[1080],['img/beguru.png'],[0],[4]]
+    ]
+
+    upgradeDisplay = [
+        [null],
+        [['チラシ配り'],[1],[3],[540]],
+        [['美味しいパン'],[1],[6],[920]],
+        [['黒字'],[1],[11],[1080]]
+    ];
+    
+    save();
+};
